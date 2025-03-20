@@ -4,3 +4,12 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+
+[lib]
+name = "rust_math_lib"
+path = "src/lib.rs"
+# crate-type = ["cdylib"] # To create a dynamic library
+
+[[bin]]
+name = "rust_math_bin"
+path = "src/main.rs"
