@@ -91,4 +91,32 @@ mod tests {
         println!("Result:    {}\nExpected:  {}\nTolerance: {}\nDelta:     {}", result, expected, tolerance, delta);
         assert!(delta < tolerance);
     }
+
+    #[test]
+    fn test_integrate_custom_function_1() {
+        let lower_limit = -1.0;
+        let upper_limit =  3.0;
+        let num_intervals = 1e8 as u32;
+        let function = |x: f64| ((x + 2.0).powi(2) + 3.0 * (4.0 * x).sin()) / (x + 4.0); //
+        let result = Integrator::integrate(function, lower_limit, upper_limit, num_intervals);
+        let expected = 7.15492507558; // Thanks to Desmos
+        let tolerance = 1e-6;
+        let delta = (result - expected).abs();
+        println!("Result:    {}\nExpected:  {}\nTolerance: {}\nDelta:     {}", result, expected, tolerance, delta);
+        assert!(delta < tolerance);
+    }
+
+    #[test]
+    fn test_integrate_custom_function_2() {
+        let lower_limit = -1.5;
+        let upper_limit =  1.4;
+        let num_intervals = 1e8 as u32;
+        let function = |x: f64| ((0.5 * x + 3.0).ln() / (-x).cos()).sqrt();
+        let result = Integrator::integrate(function, lower_limit, upper_limit, num_intervals);
+        let expected = 4.00152756063; // Thanks to Desmos
+        let tolerance = 1e-6;
+        let delta = (result - expected).abs();
+        println!("Result:    {}\nExpected:  {}\nTolerance: {}\nDelta:     {}", result, expected, tolerance, delta);
+        assert!(delta < tolerance);
+    }
 }
