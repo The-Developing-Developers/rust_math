@@ -97,7 +97,7 @@ mod tests {
         let lower_limit = -1.0;
         let upper_limit =  3.0;
         let num_intervals = 1e8 as u32;
-        let function = |x: f64| ((x + 2.0).powi(2) + 3.0 * (4.0 * x).sin()) / (x + 4.0); //
+        let function = |x: f64| ((x + 2.0).powi(2) + 3.0 * (4.0 * x).sin()) / (x + 4.0);
         let result = Integrator::integrate(function, lower_limit, upper_limit, num_intervals);
         let expected = 7.15492507558; // Thanks to Desmos
         let tolerance = 1e-6;
