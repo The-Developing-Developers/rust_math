@@ -44,68 +44,79 @@ impl Derivative {
 mod tests {
     use super::*;
 
+    use crate::utils::colours::{*};
+
+    /// Helper function to test differentiation with common logic.
+    fn test_differentiation<F>(
+        function: F,
+        point: f64,
+        increment: f64,
+        expected: f64,
+        tolerance: f64,
+    ) where
+        F: Fn(f64) -> f64,
+    {
+        let result = Derivative::differentiate(function, point, increment);
+        let delta = (result - expected).abs();
+        println!(
+            "{}Result{}:    {}\n{}Expected{}:  {}\n{}Tolerance{}: {}\n{}Delta{}:     {}",
+            MAGENTA, RESET, result, CYAN, RESET, expected, YELLOW, RESET, tolerance, GREEN, RESET, delta
+        );
+        assert!(delta < tolerance);
+    }
+
     #[test]
     fn test_differentiate_square() {
-        let point = 2.0;
-        let increment = 1e-6;
-        let function = |x: f64| x * x;
-        let result = Derivative::differentiate(function, point, increment);
-        let expected = 4.0; // The derivative of x^2 at x = 2 is 2*x = 4
-        let tolerance = 2e-6;
-        let delta = (result - expected).abs();
-        println!("Result:    {}\nExpected:  {}\nTolerance: {}\nDelta:     {}", result, expected, tolerance, delta);
-        assert!(delta < tolerance, "Expected: {}, but got: {}", expected, result);
+        test_differentiation(
+            |x| x * x,
+            2.0,
+            1e-6,
+            4.0,
+            2e-6,
+        );
     }
 
     #[test]
     fn test_differentiate_sine() {
-        let point = std::f64::consts::PI / 2.0;
-        let increment = 1e-6;
-        let function = |x: f64| (x).sin();
-        let result = Derivative::differentiate(function, point, increment);
-        let expected = 0.0; // The derivative of sin(x) at x = pi/2 is cos(pi/2) = 0
-        let tolerance = 1e-6;
-        let delta = (result - expected).abs();
-        println!("Result:    {}\nExpected:  {}\nTolerance: {}\nDelta:     {}", result, expected, tolerance, delta);
-        assert!(delta < tolerance, "Expected: {}, but got: {}", expected, result);
+        test_differentiation(
+            |x| x.sin(),
+            std::f64::consts::PI / 2.0,
+            1e-6,
+            0.0,
+            1e-6,
+        );
     }
 
     #[test]
     fn test_differentiate_exponential() {
-        let point = 1.0;
-        let increment = 1e-8;
-        let function = |x: f64| (x).exp();
-        let result = Derivative::differentiate(function, point, increment);
-        let expected = std::f64::consts::E; // The derivative of e^x at x = 1 is e^1 = e
-        let tolerance = 1e-6;
-        let delta = (result - expected).abs();
-        println!("Result:    {}\nExpected:  {}\nTolerance: {}\nDelta:     {}", result, expected, tolerance, delta);
-        assert!(delta < tolerance, "Expected: {}, but got: {}", expected, result);
+        test_differentiation(
+            |x| x.exp(),
+            1.0,
+            1e-8,
+            std::f64::consts::E,
+            1e-6,
+        );
     }
 
     #[test]
     fn test_differentiate_exponential_neg() {
-        let point = -1.0;
-        let increment = 1e-8;
-        let function = |x: f64| (-x).exp(); // e^(-x) = 1/e^x
-        let result = Derivative::differentiate(function, point, increment);
-        let expected = -std::f64::consts::E; // The derivative of e^(-x) at x = -1 is -e^(-(-1)) = -e
-        let tolerance = 1e-6;
-        let delta = (result - expected).abs();
-        println!("Result:    {}\nExpected:  {}\nTolerance: {}\nDelta:     {}", result, expected, tolerance, delta);
-        assert!(delta < tolerance, "Expected: {}, but got: {}", expected, result);
+        test_differentiation(
+            |x| (-x).exp(),
+            -1.0,
+            1e-8,
+            -std::f64::consts::E,
+            1e-6,
+        );
     }
 
     #[test]
     fn test_differentiate_custom_function_1() {
-        let point = 1.0;
-        let increment = 1e-8;
-        let function = |x: f64| 5.0 * x.powi(3) + ((2.0 * x + 1.0).ln() / (3.0 * x - 2.0).sin());
-        let result = Derivative::differentiate(function, point, increment);
-        let expected = 13.2773430404; // Thanks to Desmos
-        let tolerance = 1e-6;
-        let delta = (result - expected).abs();
-        println!("Result:    {}\nExpected:  {}\nTolerance: {}\nDelta:     {}", result, expected, tolerance, delta);
-        assert!(delta < tolerance, "Expected: {}, but got: {}", expected, result);
+        test_differentiation(
+            |x| 5.0 * x.powi(3) + ((2.0 * x + 1.0).ln() / (3.0 * x - 2.0).sin()),
+            1.0,
+            1e-8,
+            13.2773430404,
+            1e-6,
+        );
     }
 }

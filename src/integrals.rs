@@ -49,75 +49,85 @@ impl Integrator {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::utils::colours::{*};
+    use crate::utils::colours::{MAGENTA, RESET, CYAN, YELLOW, GREEN};
+
+    /// Helper function to test integration with common logic.
+    fn test_integration<F>(
+        function: F,
+        lower_limit: f64,
+        upper_limit: f64,
+        num_intervals: u32,
+        expected: f64,
+        tolerance: f64,
+    ) where
+        F: Fn(f64) -> f64,
+    {
+        let result = Integrator::integrate(function, lower_limit, upper_limit, num_intervals);
+        let delta = (result - expected).abs();
+        println!(
+            "{}Result{}:    {}\n{}Expected{}:  {}\n{}Tolerance{}: {}\n{}Delta{}:     {}",
+            MAGENTA, RESET, result, CYAN, RESET, expected, YELLOW, RESET, tolerance, GREEN, RESET, delta
+        );
+        assert!(delta < tolerance);
+    }
 
     #[test]
     fn test_integrate_square() {
-        let lower_limit = 0.0;
-        let upper_limit = 3.0;
-        let num_intervals = 1e7 as u32;
-        let function = |x: f64| x * x;
-        let result = Integrator::integrate(function, lower_limit, upper_limit, num_intervals);
-        let expected = 9.0;
-        let tolerance = 1e-5;
-        let delta = (result - expected).abs();
-        println!("{}Result{}:    {}\n{}Expected{}:  {}\n{}Tolerance{}: {}\n{}Delta{}:     {}", MAGENTA, RESET, result, CYAN, RESET, expected, YELLOW, RESET, tolerance, GREEN, RESET, delta);
-        assert!(delta < tolerance);
+        test_integration(
+            |x| x * x,
+            0.0,
+            3.0,
+            1e7 as u32,
+            9.0,
+            1e-5,
+        );
     }
 
     #[test]
     fn test_integrate_sine() {
-        let lower_limit = 0.0;
-        let upper_limit = std::f64::consts::PI;
-        let num_intervals = 1e7 as u32;
-        let function = |x: f64| (x).sin();
-        let result = Integrator::integrate(function, lower_limit, upper_limit, num_intervals);
-        let expected = 2.0;
-        let tolerance = 1e-5;
-        let delta = (result - expected).abs();
-        println!("Result:    {}\nExpected:  {}\nTolerance: {}\nDelta:     {}", result, expected, tolerance, delta);
-        assert!(delta < tolerance);
+        test_integration(
+            |x| x.sin(),
+            0.0,
+            std::f64::consts::PI,
+            1e7 as u32,
+            2.0,
+            1e-5,
+        );
     }
 
     #[test]
     fn test_integrate_sine_reverse() {
-        let lower_limit = std::f64::consts::PI;
-        let upper_limit = 0.0;
-        let num_intervals = 1e7 as u32;
-        let function = |x: f64| (x).sin();
-        let result = Integrator::integrate(function, lower_limit, upper_limit, num_intervals);
-        let expected = -2.0;
-        let tolerance = 1e-5;
-        let delta = (result - expected).abs();
-        println!("Result:    {}\nExpected:  {}\nTolerance: {}\nDelta:     {}", result, expected, tolerance, delta);
-        assert!(delta < tolerance);
+        test_integration(
+            |x| x.sin(),
+            std::f64::consts::PI,
+            0.0,
+            1e7 as u32,
+            -2.0,
+            1e-5,
+        );
     }
 
     #[test]
     fn test_integrate_custom_function_1() {
-        let lower_limit = -1.0;
-        let upper_limit =  3.0;
-        let num_intervals = 1e7 as u32;
-        let function = |x: f64| ((x + 2.0).powi(2) + 3.0 * (4.0 * x).sin()) / (x + 4.0);
-        let result = Integrator::integrate(function, lower_limit, upper_limit, num_intervals);
-        let expected = 7.15492507558; // Thanks to Desmos
-        let tolerance = 1e-5;
-        let delta = (result - expected).abs();
-        println!("Result:    {}\nExpected:  {}\nTolerance: {}\nDelta:     {}", result, expected, tolerance, delta);
-        assert!(delta < tolerance);
+        test_integration(
+            |x| ((x + 2.0).powi(2) + 3.0 * (4.0 * x).sin()) / (x + 4.0),
+            -1.0,
+            3.0,
+            1e7 as u32,
+            7.15492507558,
+            1e-5,
+        );
     }
 
     #[test]
     fn test_integrate_custom_function_2() {
-        let lower_limit = -1.5;
-        let upper_limit =  1.4;
-        let num_intervals = 1e7 as u32;
-        let function = |x: f64| ((0.5 * x + 3.0).ln() / (-x).cos()).sqrt();
-        let result = Integrator::integrate(function, lower_limit, upper_limit, num_intervals);
-        let expected = 4.00152756063; // Thanks to Desmos
-        let tolerance = 1e-5;
-        let delta = (result - expected).abs();
-        println!("Result:    {}\nExpected:  {}\nTolerance: {}\nDelta:     {}", result, expected, tolerance, delta);
-        assert!(delta < tolerance);
+        test_integration(
+            |x| ((0.5 * x + 3.0).ln() / (-x).cos()).sqrt(),
+            -1.5,
+            1.4,
+            1e7 as u32,
+            4.00152756063,
+            1e-5,
+        );
     }
 }
