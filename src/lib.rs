@@ -5,3 +5,6 @@ pub mod integrals;
 
 /// The `derivatives` module provides functions for performing derivative calculations.
 pub mod derivatives;
+
+/// Various utilities.
+pub mod utils;
