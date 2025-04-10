@@ -1,12 +1,12 @@
 //! Entry point for a CLI application that uses the `rust_math_lib` library.
 
-use rust_math_lib::integrals::Integrator;
+use rust_math_lib::integrals::Integral;
 use rust_math_lib::utils::colours::{*};
 
 fn main() {
     println!("****************************** START ******************************\n");
 
-    // ---- Example of usage of the `Integrator` struct ---- //
+    // ---- Example of usage of the `Integral` struct ---- //
 
     // ---- Square function ---- //
 
@@ -23,7 +23,7 @@ fn main() {
         } else {
             println!("\nUsing {}{}{} intervals.", MAGENTA, intervals, RESET);
         }
-        let result = Integrator::integrate(function, lower, upper, intervals);
+        let result = Integral::new(function, lower, upper, intervals as u64).integrate();
         println!("The result is: {}{:.6}{}", GREEN, result, RESET);
     }
 
@@ -41,7 +41,7 @@ fn main() {
         } else {
             println!("\nUsing {}{}{} intervals.", MAGENTA, *intervals, RESET);
         }
-        let result = Integrator::integrate(function, lower, upper, *intervals);
+        let result = Integral::new(function, lower, upper, *intervals as u64).integrate();
         println!("The result is: {}{:.6}{}", GREEN, result, RESET);
     }
 

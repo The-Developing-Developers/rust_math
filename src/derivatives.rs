@@ -3,21 +3,24 @@
 //! For now, it only contains the `Derivative` struct with a single method `forward_difference`, which performs numerical
 //! differentiation using finite differences.
 
+type Function = fn(f64) -> f64;
+
 /// A struct that provides numerical differentiation methods.
 pub struct Derivative {
-    pub function: fn(f64) -> f64,
+    pub function: Function,
     pub x_coordinate: f64,
     pub increment: f64,
     result: f64,
 }
 
 impl Derivative {
-    pub fn new(function: fn(f64) -> f64, x_coordinate: f64, increment: f64) -> Self {
-        assert!(
-            // TODO: GS consider removing the assert!() and use a Result type instead.
-            increment > 0.0,
-            "Infinitesimal increment must be greater than zero."
-        );
+    pub fn new(function: Function, x_coordinate: f64, increment: f64) -> Self { // TODO: GS consider returning a Result instead of a struct
+        let increment = if increment > 0.0 {
+            increment
+        } else {
+            1e-6 // Default value for increment
+        };
+
         Derivative {
             function,
             x_coordinate,
@@ -31,6 +34,8 @@ impl Derivative {
     }
 
     // TODO: GS add a print result method to print the result of the derivative
+
+    // TODO: GS add a copy constructor (`from`) as in `Integrator`
 
     // TODO: GS add central and backward difference methods
 
@@ -54,7 +59,7 @@ impl Derivative {
     /// let mut derivative = Derivative::new(|x| x * x, 2.0, 1e-6);
     /// let result = derivative.forward_difference();
     /// ```
-    pub fn forward_difference(&mut self) -> f64 // TODO: GS is it possible to only modify the result field and not the whole struct?
+    pub fn forward_difference(&mut self) -> f64
     {
         self.result = ((self.function)(self.x_coordinate + self.increment)
             - (self.function)(self.x_coordinate))
@@ -73,13 +78,13 @@ mod tests {
 
     /// Helper function to test differentiation with common logic.
     fn test_differentiation(
-        function: fn(f64) -> f64,
+        function: Function,
         x_coordinate: f64,
         increment: f64,
         expected: f64,
         tolerance: f64,
     ) {
-        let mut derivative = Derivative::new(function, x_coordinate, increment); // TODO: GS is it possible to only modify the result field and not the whole struct?
+        let mut derivative = Derivative::new(function, x_coordinate, increment);
         let result = derivative.forward_difference();
         let delta = (result - expected).abs();
         println!(

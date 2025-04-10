@@ -3,15 +3,39 @@
 //! For now, it only contains the `Integrator` struct with a single method `integrate`, which performs numerical
 //! integration using the Riemann sum method.
 
-/// A struct that provides numerical integration methods.
-pub struct Integrator;
+type Function = fn(f64) -> f64; // TODO: GS consider using a trait object instead of a function pointer, or commonise the type definiton since it is used in both `integrals` and `derivatives` modules
 
-impl Integrator {
+/// A struct that provides numerical integration methods.
+pub struct Integral {
+    pub function: Function, // Function to integrate
+    pub lower_bound: f64,
+    pub upper_bound: f64,
+    pub num_intervals: u64,
+    result: f64,
+}
+
+impl Integral {
+    pub fn new(function: Function, lower_bound: f64, upper_bound: f64, num_intervals: u64) -> Self { // TODO: GS consider returning a Result instead of a struct
+        let num_intervals = if num_intervals > 0 {
+            num_intervals
+        } else {
+            1e6 as u64 // Default value for number of intervals
+        };
+
+        Integral {
+            function,
+            lower_bound,
+            upper_bound,
+            num_intervals,
+            result: 0.0,
+        }
+    }
+
     /// Performs numerical integration using the Riemann sum method.
     ///
     /// # Arguments
     ///
-    /// * `integrand_fn` - A closure that represents the function to integrate.
+    /// * `function` - A closure that represents the function to integrate.
     /// * `lower_limit` - The lower limit of the integration.
     /// * `upper_limit` - The upper limit of the integration.
     /// * `num_intervals` - The number of intervals to divide the integration range into. The higher the number, the more accurate the result, but the slower the computation. Recommended value: `1e6` or higher.
@@ -23,24 +47,21 @@ impl Integrator {
     /// # Example
     ///
     /// ```
-    /// use rust_math_lib::integrals::Integrator;
+    /// use rust_math_lib::integrals::Integral;
     ///
-    /// let result = Integrator::integrate(|x| x * x, 0.0, 3.0, 1e6 as u32);
+    /// let result = Integral::new(|x| x * x, 0.0, 3.0, 1e6 as u64).integrate();
     /// println!("The integral is approximately: {}", result);
     /// ```
-    pub fn integrate<F>(integrand_fn: F, lower_limit: f64, upper_limit: f64, num_intervals: u32) -> f64
-    where
-        F: Fn(f64) -> f64, // `F` is a closure that takes an `f64` argument and returns a `f64`
+    pub fn integrate(& mut self) -> f64
     {
-        let mut sum = 0.0;
-        let dx = (upper_limit - lower_limit) / num_intervals as f64; // Width of each slice of the interval
+        let width = (self.upper_bound - self.lower_bound) / self.num_intervals as f64; // Width of each slice of the interval
 
-        for i in 0..num_intervals {
-            let x = lower_limit + i as f64 * dx;
-            sum += integrand_fn(x) * dx; // Infinitesimal area to be accumulated
+        for i in 0..self.num_intervals {
+            let x_coordinate = self.lower_bound + i as f64 * width;
+            self.result += (self.function)(x_coordinate) * width; // Infinitesimal area to be accumulated
         }
 
-        sum
+        self.result
     }
 }
 
@@ -52,17 +73,17 @@ mod tests {
     use crate::utils::colours::{MAGENTA, RESET, CYAN, YELLOW, GREEN};
 
     /// Helper function to test integration with common logic.
-    fn test_integration<F>(
-        function: F,
-        lower_limit: f64,
-        upper_limit: f64,
+    fn test_integration(
+        function: Function,
+        lower_bound: f64,
+        upper_bound: f64,
         num_intervals: u32,
         expected: f64,
         tolerance: f64,
-    ) where
-        F: Fn(f64) -> f64,
+    )
     {
-        let result = Integrator::integrate(function, lower_limit, upper_limit, num_intervals);
+        let mut integral = Integral::new(function, lower_bound, upper_bound, num_intervals as u64);
+        let result = integral.integrate();
         let delta = (result - expected).abs();
         println!(
             "{}Result{}:    {}\n{}Expected{}:  {}\n{}Tolerance{}: {}\n{}Delta{}:     {}",
