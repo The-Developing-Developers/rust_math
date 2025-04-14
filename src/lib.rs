@@ -1,15 +1,10 @@
-///
-/// TODO: write a doc comment to describe the crate
-///
+//! Entry point for the `rust_math_lib` library.
+
+/// The `integrals` module provides functions for performing integral calculations.
 pub mod integrals;
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+/// The `derivatives` module provides functions for performing derivative calculations.
+pub mod derivatives;
 
-    #[test]
-    fn temp_test_function() {
-        let result = integrals::temp_test_function();
-        assert_eq!(result, 3);
-    }
-}
+/// Various utilities.
+pub mod utils;
