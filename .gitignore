@@ -17,4 +17,4 @@ target/
 #.idea/
 
 # Miscellanea
-scripts/changes.py
+scripts
