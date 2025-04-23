@@ -4,6 +4,7 @@ use figlet_rs::FIGfont;
 use inquire::{Select, Text, error::InquireError};
 use meval;
 
+use rust_math_lib::derivatives::Derivative;
 use rust_math_lib::integrals::Integral;
 
 fn main() {
@@ -20,6 +21,7 @@ fn main() {
         "Derivatives" => {
             println!("You selected Derivatives.");
             // Call the derivatives module or function here
+            call_derivatives();
         }
         "Exit" => {
             println!("Exiting...");
@@ -82,4 +84,19 @@ fn call_integrals() {
 
     let res = Integral::new(Box::new(func), lower_bound, upper_bound, num_intervals).integrate();
     println!("The result of the integral is: {}", res);
+}
+
+fn call_derivatives() {
+    let func = Text::new("Insert the function: ").prompt().unwrap();
+    let expr: meval::Expr = func.parse().unwrap();
+    let func = expr.clone().bind("x").unwrap();
+
+    let x_coord = Text::new("Insert X coordinate: ").prompt().unwrap();
+    let x_coord = meval::eval_str(x_coord).unwrap();
+
+    let increment = Text::new("Insert the increment: ").prompt().unwrap();
+    let increment = meval::eval_str(increment).unwrap();
+
+    let res = Derivative::new(Box::new(func), x_coord, increment).forward_difference();
+    println!("The result of the derivate is: {}", res);
 }
