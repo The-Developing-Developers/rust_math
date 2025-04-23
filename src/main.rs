@@ -1,8 +1,10 @@
 //! Entry point for a CLI application that uses the `rust_math_lib` library.
 
 use figlet_rs::FIGfont;
-use inquire::{Select, error::InquireError};
+use inquire::{Select, Text, error::InquireError};
 use meval;
+
+use rust_math_lib::integrals::Integral;
 
 fn main() {
     print_title();
@@ -58,9 +60,26 @@ fn call_integrals() {
     let mut ctx = meval::Context::new();
     ctx.var("x", 2.0);
 
-    let expr = "x^2";
-    let res = meval::eval_str_with_context(expr, ctx).unwrap();
+    let func = Text::new("Insert the function: ").prompt().unwrap();
+    let expr: meval::Expr = func.parse().unwrap();
+    let func = expr.clone().bind("x").unwrap();
 
-    // Print the result
+    let lower_bound = Text::new("Insert the lower bound: ").prompt().unwrap();
+    let lower_bound = meval::eval_str(lower_bound).unwrap();
+
+    let upper_bound = Text::new("Insert the upper bound: ").prompt().unwrap();
+    let upper_bound = meval::eval_str(upper_bound).unwrap();
+
+    let num_intervals = Text::new("Insert the number of intervals: ")
+        .prompt()
+        .unwrap();
+    let num_intervals = meval::eval_str(num_intervals).unwrap() as u64;
+
+    println!("Test function: {:?}", expr);
+    println!("Lower bound: {lower_bound}");
+    println!("Upper bound: {upper_bound}");
+    println!("Intervals: {num_intervals}");
+
+    let res = Integral::new(Box::new(func), lower_bound, upper_bound, num_intervals).integrate();
     println!("The result of the integral is: {}", res);
 }
