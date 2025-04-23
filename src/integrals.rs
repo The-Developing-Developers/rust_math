@@ -15,7 +15,8 @@ pub struct Integral {
 }
 
 impl Integral {
-    pub fn new(function: Function, lower_bound: f64, upper_bound: f64, num_intervals: u64) -> Self { // TODO: GS consider returning a Result instead of a struct
+    pub fn new(function: Function, lower_bound: f64, upper_bound: f64, num_intervals: u64) -> Self {
+        // TODO: GS consider returning a Result instead of a struct
         let num_intervals = if num_intervals > 0 {
             num_intervals
         } else {
@@ -52,8 +53,7 @@ impl Integral {
     /// let result = Integral::new(|x| x * x, 0.0, 3.0, 1e6 as u64).integrate();
     /// println!("The integral is approximately: {}", result);
     /// ```
-    pub fn integrate(& mut self) -> f64
-    {
+    pub fn integrate(&mut self) -> f64 {
         let width = (self.upper_bound - self.lower_bound) / self.num_intervals as f64; // Width of each slice of the interval
 
         for i in 0..self.num_intervals {
@@ -70,7 +70,7 @@ impl Integral {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::utils::colours::{MAGENTA, RESET, CYAN, YELLOW, GREEN};
+    use crate::utils::colours::{CYAN, GREEN, MAGENTA, RESET, YELLOW};
 
     /// Helper function to test integration with common logic.
     fn test_integration(
@@ -91,21 +91,25 @@ mod tests {
         let delta = (result - expected).abs();
         println!(
             "{}Result{}:    {}\n{}Expected{}:  {}\n{}Tolerance{}: {}\n{}Delta{}:     {}",
-            MAGENTA, RESET, result, CYAN, RESET, expected, YELLOW, RESET, tolerance, GREEN, RESET, delta
+            MAGENTA,
+            RESET,
+            result,
+            CYAN,
+            RESET,
+            expected,
+            YELLOW,
+            RESET,
+            tolerance,
+            GREEN,
+            RESET,
+            delta
         );
         assert!(delta < tolerance);
     }
 
     #[test]
     fn test_integrate_square() {
-        test_integration(
-            |x| x * x,
-            0.0,
-            3.0,
-            1e7 as u32,
-            9.0,
-            1e-5,
-        );
+        test_integration(|x| x * x, 0.0, 3.0, 1e7 as u32, 9.0, 1e-5);
     }
 
     #[test]
