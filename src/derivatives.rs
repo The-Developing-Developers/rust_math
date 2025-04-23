@@ -3,7 +3,7 @@
 //! For now, it only contains the `Derivative` struct with a single method `forward_difference`, which performs numerical
 //! differentiation using finite differences.
 
-type Function = fn(f64) -> f64;
+type Function = Box<dyn Fn(f64) -> f64>;
 
 /// A struct that provides numerical differentiation methods.
 pub struct Derivative {
@@ -128,13 +128,13 @@ mod tests {
     /// * `expected` - The expected value of the derivative.
     /// * `error_tolerance` - The acceptable error tolerance for the test.
     fn test_differentiation(
-        function: Function,
+        function: fn(f64) -> f64,
         x_coordinate: f64,
         increment: f64,
         expected: f64,
         error_tolerance: f64,
     ) {
-        let mut derivative = Derivative::new(function, x_coordinate, increment);
+        let mut derivative = Derivative::new(Box::new(function), x_coordinate, increment);
         let results_vec = vec![
             ("Forward" , derivative.forward_difference()),
             ("Backward", derivative.backward_difference()),
