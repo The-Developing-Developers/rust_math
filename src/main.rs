@@ -1,49 +1,53 @@
 //! Entry point for a CLI application that uses the `rust_math_lib` library.
 
-use rust_math_lib::integrals::Integral;
-use rust_math_lib::utils::colours::{*};
+use figlet_rs::FIGfont;
+use inquire::{Select, error::InquireError};
 
 fn main() {
-    println!("****************************** START ******************************\n");
+    print_title();
+    println!("Welcome to the Rust Math CLI!");
 
-    // ---- Example of usage of the `Integral` struct ---- //
-
-    // ---- Square function ---- //
-
-    let lower = 0.0;
-    let upper = 3.0;
-    let function = |x: f64| x * x;
-    let intervals_list = [1e3 as u32, 1e4 as u32, 1e5 as u32, 1e6 as u32, 1e7 as u32, 1e8 as u32];
-    println!("Integrating function {}x^2{} from {}{}{} to {}{}{}, using different numbers of intervals.", YELLOW, RESET, GREEN, lower, RESET, GREEN, upper, RESET);
-
-    // Iterating over the list of intervals without references (`intervals_list` is an array of primitive values, which implement the `Copy` trait and are cheap to copy).
-    for intervals in intervals_list {
-        if intervals > 1e5 as u32 {
-            println!("\nUsing {}{:e}{} intervals.", MAGENTA, intervals as f64, RESET);
-        } else {
-            println!("\nUsing {}{}{} intervals.", MAGENTA, intervals, RESET);
+    let next_menu = main_menu();
+    match next_menu.as_str() {
+        "Integrals" => {
+            println!("You selected Integrals.");
+            // Call the integrals module or function here
         }
-        let result = Integral::new(function, lower, upper, intervals as u64).integrate();
-        println!("The result is: {}{:.6}{}", GREEN, result, RESET);
-    }
-
-    // ---- Sine function ---- //
-
-    let lower = 0.0;
-    let upper = std::f64::consts::PI;
-    let function = |x: f64| (x).sin();
-    println!("\nIntegrating function {}sin(x){} from {}{}{} to {}pi{}, using different numbers of intervals.", YELLOW, RESET, GREEN, lower, RESET, GREEN, RESET);
-
-    // Same iteration as above, but using references (`&intervals_list` is a slice of references). Not necessary in this case, but it's a good practice in general.
-    for intervals in &intervals_list {
-        if *intervals > 1e5 as u32 {
-            println!("\nUsing {}{:e}{} intervals.", MAGENTA, *intervals as f64, RESET);
-        } else {
-            println!("\nUsing {}{}{} intervals.", MAGENTA, *intervals, RESET);
+        "Derivatives" => {
+            println!("You selected Derivatives.");
+            // Call the derivatives module or function here
         }
-        let result = Integral::new(function, lower, upper, *intervals as u64).integrate();
-        println!("The result is: {}{:.6}{}", GREEN, result, RESET);
+        "Exit" => {
+            println!("Exiting...");
+            std::process::exit(0);
+        }
+        _ => {
+            println!("Invalid selection. Exiting...");
+            std::process::exit(1);
+        }
     }
+}
 
-    println!("\n******************************  END  ******************************");
+fn print_title() {
+    let title = "Rust Math";
+    let font = FIGfont::standard().unwrap();
+    let figure = font.convert(title).unwrap();
+    println!("{}", figure);
+}
+
+fn main_menu() -> String {
+    let options = vec!["Integrals", "Derivatives", "Exit"];
+
+    let selected: Result<&str, InquireError> =
+        Select::new("Select type of calculation?", options).prompt();
+
+    match selected {
+        Ok(choice) => {
+            return String::from(choice);
+        }
+        Err(_) => {
+            println!("Something went wrong! Exiting...");
+            std::process::exit(1);
+        }
+    }
 }
