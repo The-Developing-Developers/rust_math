@@ -3,7 +3,7 @@
 //! For now, it only contains the `Integrator` struct with a single method `integrate`, which performs numerical
 //! integration using the Riemann sum method.
 
-type Function = fn(f64) -> f64; // TODO: GS consider using a trait object instead of a function pointer, or commonise the type definiton since it is used in both `integrals` and `derivatives` modules
+type Function = Box<dyn Fn(f64) -> f64>; // TODO: GS consider using a trait object instead of a function pointer, or commonise the type definiton since it is used in both `integrals` and `derivatives` modules
 
 /// A struct that provides numerical integration methods.
 pub struct Integral {
@@ -74,15 +74,19 @@ mod tests {
 
     /// Helper function to test integration with common logic.
     fn test_integration(
-        function: Function,
+        function: fn(f64) -> f64,
         lower_bound: f64,
         upper_bound: f64,
         num_intervals: u32,
         expected: f64,
         tolerance: f64,
-    )
-    {
-        let mut integral = Integral::new(function, lower_bound, upper_bound, num_intervals as u64);
+    ) {
+        let mut integral = Integral::new(
+            Box::new(function),
+            lower_bound,
+            upper_bound,
+            num_intervals as u64,
+        );
         let result = integral.integrate();
         let delta = (result - expected).abs();
         println!(
