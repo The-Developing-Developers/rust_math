@@ -2,6 +2,7 @@
 
 use figlet_rs::FIGfont;
 use inquire::{Select, error::InquireError};
+use meval;
 
 fn main() {
     print_title();
@@ -12,6 +13,7 @@ fn main() {
         "Integrals" => {
             println!("You selected Integrals.");
             // Call the integrals module or function here
+            call_integrals();
         }
         "Derivatives" => {
             println!("You selected Derivatives.");
@@ -50,4 +52,15 @@ fn main_menu() -> String {
             std::process::exit(1);
         }
     }
+}
+
+fn call_integrals() {
+    let mut ctx = meval::Context::new();
+    ctx.var("x", 2.0);
+
+    let expr = "x^2";
+    let res = meval::eval_str_with_context(expr, ctx).unwrap();
+
+    // Print the result
+    println!("The result of the integral is: {}", res);
 }
