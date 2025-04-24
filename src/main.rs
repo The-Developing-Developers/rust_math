@@ -1,49 +1,93 @@
 //! Entry point for a CLI application that uses the `rust_math_lib` library.
 
-use rust_math_lib::integrals::Integral;
-use rust_math_lib::utils::colours::{*};
+// use rust_math_lib::integrals::Integral;
+// use rust_math_lib::utils::colours::{*};
+
+use crossterm::{
+    cursor,
+    execute,
+    style::{Color, Print, ResetColor, SetBackgroundColor},
+    terminal::{Clear, ClearType},
+};
+use std::{
+    io::{stdout, Write, stdin},
+    thread,
+    time::Duration,
+}; // `thread` and `time::Duration` are used for simulating the loading process.
 
 fn main() {
-    println!("****************************** START ******************************\n");
+    let mut stdout = stdout();
 
-    // ---- Example of usage of the `Integral` struct ---- //
+    // Clear the screen and display the greeting message
+    execute!(
+        stdout,
+        Clear(ClearType::All), // Clear the entire screen
+        cursor::MoveTo(0, 0), // Move the cursor to the top-left corner
+        Print("Welcome to the Rust Math library Command Line Interface!\n"),
+        Print("Loading, please wait...\n\n")
+    )
+    .unwrap(); // Ensure the output is displayed immediately. Panic if it fails.
 
-    // ---- Square function ---- //
+    // Simulate a loading bar
+    let total_steps = 20; // Number of steps in the loading bar
+    let delay = Duration::from_millis(100); // Delay between steps (100ms for 3 seconds total)
 
-    let lower = 0.0;
-    let upper = 3.0;
-    let function = |x: f64| x * x;
-    let intervals_list = [1e3 as u32, 1e4 as u32, 1e5 as u32, 1e6 as u32, 1e7 as u32, 1e8 as u32];
-    println!("Integrating function {}x^2{} from {}{}{} to {}{}{}, using different numbers of intervals.", YELLOW, RESET, GREEN, lower, RESET, GREEN, upper, RESET);
+    for step in 0 ..= total_steps {
+        let percentage = (step as f32 / total_steps as f32) * 100.0; // Calculate the percentage of the loading bar
 
-    // Iterating over the list of intervals without references (`intervals_list` is an array of primitive values, which implement the `Copy` trait and are cheap to copy).
-    for intervals in intervals_list {
-        if intervals > 1e5 as u32 {
-            println!("\nUsing {}{:e}{} intervals.", MAGENTA, intervals as f64, RESET);
-        } else {
-            println!("\nUsing {}{}{} intervals.", MAGENTA, intervals, RESET);
-        }
-        let result = Integral::new(function, lower, upper, intervals as u64).integrate();
-        println!("The result is: {}{:.6}{}", GREEN, result, RESET);
+        // Draw the loading bar
+        execute!(
+            stdout,
+            cursor::MoveTo(0, 3), // Move to the line where the loading bar is displayed
+            Print("["),
+            SetBackgroundColor(Color::Green),
+            Print(" ".repeat(step)), // Filled part of the bar
+            ResetColor,
+            Print(" ".repeat(total_steps - step)), // Empty part of the bar
+            Print("] "),
+            Print(format!("{:.0}%", percentage)) // Display percentage
+        )
+        .unwrap();
+
+        stdout.flush().unwrap(); // Ensure the output is displayed immediately
+        thread::sleep(delay); // Wait before the next step
     }
 
-    // ---- Sine function ---- //
+    // Final message after loading is complete
+    execute!(
+        stdout,
+        cursor::MoveTo(0, 5),
+        Print("Loading complete.\n\n")
+    )
+    .unwrap();
 
-    let lower = 0.0;
-    let upper = std::f64::consts::PI;
-    let function = |x: f64| (x).sin();
-    println!("\nIntegrating function {}sin(x){} from {}{}{} to {}pi{}, using different numbers of intervals.", YELLOW, RESET, GREEN, lower, RESET, GREEN, RESET);
+    // Prompt the user for their choice
+    execute!(
+        stdout,
+        Print("Please choose an option:\n"),
+        Print("  1. Calculate a derivative\n"),
+        Print("  2. Calculate an integral\n"),
+        Print("Enter your choice (1 or 2): ")
+    )
+    .unwrap();
 
-    // Same iteration as above, but using references (`&intervals_list` is a slice of references). Not necessary in this case, but it's a good practice in general.
-    for intervals in &intervals_list {
-        if *intervals > 1e5 as u32 {
-            println!("\nUsing {}{:e}{} intervals.", MAGENTA, *intervals as f64, RESET);
-        } else {
-            println!("\nUsing {}{}{} intervals.", MAGENTA, *intervals, RESET);
+    // Read user input
+    let mut input = String::new();
+    stdin().read_line(&mut input).unwrap();
+    let input = input.trim();
+
+    // Handle the user's choice
+    match input {
+        "1" => {
+            execute!(stdout, Print("\nConnection to `rust_math_lib` still to be established.\n")).unwrap();
+            // Placeholder for derivative calculation logic
         }
-        let result = Integral::new(function, lower, upper, *intervals as u64).integrate();
-        println!("The result is: {}{:.6}{}", GREEN, result, RESET);
+        "2" => {
+            execute!(stdout, Print("\nConnection to `rust_math_lib` still to be established.\n")).unwrap();
+            // Placeholder for integral calculation logic
+        }
+        _ => {
+            execute!(stdout, Print("\nInvalid choice. Please restart the program.\n")).unwrap();
+        }
     }
-
-    println!("\n******************************  END  ******************************");
 }

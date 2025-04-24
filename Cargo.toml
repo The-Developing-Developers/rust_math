@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+crossterm = "0.29.0" # For terminal input/output manipulation
 
 [lib]
 name = "rust_math_lib"
