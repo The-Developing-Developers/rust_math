@@ -8,7 +8,10 @@
 //! - meval: for parsing and evaluating mathematical expressions and numbers scientifically written
 
 use figlet_rs::FIGfont;
-use inquire::{Select, Text, error::InquireError};
+use inquire::error::InquireError;
+use inquire::list_option::ListOption;
+use inquire::validator::MinLengthValidator;
+use inquire::{MultiSelect, Select, Text};
 use meval;
 
 use rust_math_lib::derivatives::Derivative;
@@ -181,22 +184,29 @@ fn call_integrals() {
 /// Requests the user to input a function, X coordinate, and increment for derivative calculation.
 /// It then performs numerical differentiation and prints the result.
 fn call_derivatives() {
-    let algorithms = vec![
-        "Forward Difference",
-        "Central Difference",
-        "Backward Difference",
+    // Define the options for the algorithms
+    let algorithms_options = vec![
+        ListOption::new(0, "Forward Difference"),
+        ListOption::new(1, "Central Difference"),
+        ListOption::new(2, "Backward Difference"),
     ];
 
-    let mut default_algorithm = "Forward Difference".to_string();
+    // Define the default values for the user inputs
+    let mut default_algorithms: Vec<usize> = vec![0, 1, 2];
     let mut default_func = "sin(x)".to_string();
     let mut default_x_coord = "0".to_string();
     let mut default_increment = "1e-7".to_string();
 
     loop {
         // Request user input for algorithm
-        let msg = &format!("Insert the algorithm (default: {}): ", default_algorithm);
-        let algorithm = Select::new(msg, algorithms.clone()).prompt().unwrap();
-        let algorithm = get_or_update_default(&algorithm.to_string(), &mut default_algorithm);
+        let msg = &format!("Insert the algorithm: ");
+        let algorithms = MultiSelect::new(msg, algorithms_options.clone())
+            .with_default(&default_algorithms)
+            .with_validator(MinLengthValidator::new(1))
+            .with_help_message("Please, select at least one algorithm!")
+            .prompt()
+            .unwrap();
+        default_algorithms = algorithms.iter().map(|x| x.index).collect();
 
         // Request user input for function
         let msg = &format!("Insert the function (default: {}): ", default_func);
@@ -228,28 +238,27 @@ fn call_derivatives() {
 
         // Perform numerical differentiation using the Derivative struct
         let mut derivative = Derivative::new(Box::new(func), x_coord, increment);
-        let res;
-        match algorithm.as_str() {
-            "Forward Difference" => {
-                println!("Using Forward Difference method.");
-                res = derivative.forward_difference();
+        algorithms.iter().for_each(|algorithm| {
+            println!("Using algorithm: {}", algorithm.value);
+            let res;
+            match algorithm.value {
+                "Forward Difference" => {
+                    res = derivative.forward_difference();
+                }
+                "Central Difference" => {
+                    res = derivative.central_difference();
+                }
+                "Backward Difference" => {
+                    res = derivative.backward_difference();
+                }
+                _ => {
+                    println!("Invalid algorithm selected. Using Forward Difference as default.");
+                    res = derivative.forward_difference();
+                }
             }
-            "Central Difference" => {
-                println!("Using Central Difference method.");
-                res = derivative.central_difference();
-            }
-            "Backward Difference" => {
-                println!("Using Backward Difference method.");
-                res = derivative.backward_difference();
-            }
-            _ => {
-                println!("Invalid algorithm selected. Using Forward Difference as default.");
-                res = derivative.forward_difference();
-            }
-        }
-
-        // Print the result of the differentiation
-        println!("The result of the derivate is: {}", res);
+            // Print the result of the differentiation
+            println!("The result of the derivate is: {}", res);
+        });
 
         // Ask the user if they want to perform another calculation
         if !ask_for_another_calculation() {
