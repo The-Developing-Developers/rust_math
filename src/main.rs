@@ -209,25 +209,31 @@ fn call_derivatives() {
         default_algorithms = algorithms.iter().map(|x| x.index).collect();
 
         // Request user input for function
-        let msg = &format!("Insert the function (default: {}): ", default_func);
-        let func = Text::new(msg).prompt().unwrap();
-        let func = get_or_update_default(&func, &mut default_func);
+        let func = Text::new("Insert the function")
+            .with_default(&default_func)
+            .prompt()
+            .unwrap();
+        default_func = func.clone();
         // Parse the function string into a meval expression
         let expr: meval::Expr = func.parse().unwrap();
         // Bind the variable 'x' to the expression
         let func = expr.clone().bind("x").unwrap();
 
         // Request user input for X coordinate
-        let msg = &format!("Insert the X coordinate (default: {}): ", default_x_coord);
-        let x_coord = Text::new(msg).prompt().unwrap();
-        let x_coord = get_or_update_default(&x_coord, &mut default_x_coord);
+        let x_coord = Text::new("Insert the X coordinate")
+            .with_default(&default_x_coord)
+            .prompt()
+            .unwrap();
+        default_x_coord = x_coord.clone();
         // Parse the X coordinate string into a floating-point number
         let x_coord = meval::eval_str(x_coord).unwrap();
 
         // Request user input for increment
-        let msg = &format!("Insert the increment (default: {}): ", default_increment);
-        let increment = Text::new(msg).prompt().unwrap();
-        let increment = get_or_update_default(&increment, &mut default_increment);
+        let increment = Text::new("Insert the increment")
+            .with_default(&default_increment)
+            .prompt()
+            .unwrap();
+        default_increment = increment.clone();
         // Parse the increment string into a floating-point number
         let increment = meval::eval_str(increment).unwrap();
 
