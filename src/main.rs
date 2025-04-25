@@ -6,6 +6,9 @@
 //! - figlet-rs: for generating ASCII art text
 //! - inquire: for user input prompts
 //! - meval: for parsing and evaluating mathematical expressions and numbers scientifically written
+//! - tabled: for displaying results in a table format
+
+use std::time::Instant;
 
 use figlet_rs::FIGfont;
 use inquire::error::InquireError;
@@ -13,9 +16,31 @@ use inquire::list_option::ListOption;
 use inquire::validator::MinLengthValidator;
 use inquire::{MultiSelect, Select, Text};
 use meval;
+use tabled;
+use tabled::{Table, Tabled};
 
 use rust_math_lib::derivatives::Derivative;
 use rust_math_lib::integrals::Integral;
+
+/// Struct to hold the statistics of the calculations performed.
+/// Used to display the results in a table format.
+///
+/// # Traits:
+/// - `Tabled`: This trait is used to format the struct for display in a table.
+///
+/// # Fields:
+/// - `algorithm`: The name of the algorithm used for the calculation.
+/// - `process_time`: The time taken to perform the calculation.
+/// - `result`: The result of the calculation.
+#[derive(Tabled)]
+struct CalculationStats {
+    #[tabled(rename = "Algorithm")]
+    pub algorithm: String,
+    #[tabled(rename = "Process Time")]
+    pub process_time: String,
+    #[tabled(rename = "Result")]
+    pub result: f64,
+}
 
 /// Main function that serves as the entry point for the CLI application.
 ///
@@ -93,6 +118,17 @@ fn ask_for_another_calculation() -> bool {
         "y" | "yes" => return true,
         _ => return false,
     }
+}
+
+/// Converts a vector of CalculationStats into a table format for display.
+fn get_stats_table(stats: &Vec<CalculationStats>) -> Table {
+    let mut table = Table::new(stats);
+    table.with(tabled::settings::Style::rounded());
+    table.modify(
+        tabled::settings::object::Columns::last(),
+        tabled::settings::Alignment::right(),
+    );
+    table
 }
 
 /// Requests the user to input a function, lower and upper bounds, and the number of intervals for integration.
@@ -233,9 +269,11 @@ fn call_derivatives() {
 
         // Perform numerical differentiation using the Derivative struct
         let mut derivative = Derivative::new(Box::new(func), x_coord, increment);
+        let mut stats: Vec<CalculationStats> = vec![];
         algorithms.iter().for_each(|algorithm| {
             println!("Using algorithm: {}", algorithm.value);
             let res;
+            let process_time = Instant::now();
             match algorithm.value {
                 "Forward Difference" => {
                     res = derivative.forward_difference();
@@ -251,9 +289,19 @@ fn call_derivatives() {
                     res = derivative.forward_difference();
                 }
             }
+            let process_time = process_time.elapsed();
+            stats.push(CalculationStats {
+                algorithm: algorithm.value.to_string(),
+                process_time: format!("{:?}", process_time),
+                result: res,
+            });
             // Print the result of the differentiation
-            println!("The result of the derivate is: {}", res);
+            // println!("The result of the derivate is: {}", res);
         });
+
+        // Print the results of the differentiation
+        println!("\nResults of the differentiation:");
+        println!("{}", get_stats_table(&stats));
 
         // Ask the user if they want to perform another calculation
         if !ask_for_another_calculation() {
