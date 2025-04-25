@@ -84,7 +84,9 @@ fn main_menu() -> String {
 ///
 fn ask_for_another_calculation() -> bool {
     // Ask the user if they want to perform another calculation
-    let another = Text::new("Do you want to perform another calculation? (yes/no)")
+    let another = Text::new("Do you want to perform another calculation?")
+        .with_default("yes")
+        .with_placeholder("yes/no")
         .prompt()
         .unwrap();
     match another.to_lowercase().as_str() {
