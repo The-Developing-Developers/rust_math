@@ -77,74 +77,152 @@ fn main_menu() -> String {
     }
 }
 
+/// Checks if the input is empty and returns the default value if it is.
+/// Otherwise, it updates the default value with the input and returns the input.
+///
+/// # Arguments
+/// * `input` - A string slice that holds the user input.
+/// * `default` - A mutable reference to a string that holds the default value.
+///
+/// # Returns
+/// A string that is either the user input or the default value.
+fn get_or_update_default(input: &String, default: &mut String) -> String {
+    let input = input.trim();
+    // Check if the input is empty and return the default value if it is
+    if input.is_empty() {
+        return default.clone();
+    }
+    // Otherwise, return the input
+    *default = input.to_string();
+    input.to_string()
+}
+
+/// Prompts the user to ask if they want to perform another calculation.
+///
+fn ask_for_another_calculation() -> bool {
+    // Ask the user if they want to perform another calculation
+    let another = Text::new("Do you want to perform another calculation? (yes/no)")
+        .prompt()
+        .unwrap();
+    match another.to_lowercase().as_str() {
+        "y" | "yes" => return true,
+        _ => return false,
+    }
+}
+
 /// Requests the user to input a function, lower and upper bounds, and the number of intervals for integration.
 /// It then performs numerical integration and prints the result.
 fn call_integrals() {
-    // Request user input for function
-    let func = Text::new("Insert the function: ").prompt().unwrap();
-    // Parse the function string into a meval expression
-    let expr: meval::Expr = func.parse().unwrap();
-    // Bind the variable 'x' to the expression
-    let func = expr.clone().bind("x").unwrap();
+    let mut default_func = "sin(x)".to_string();
+    let mut default_lower_bound = "0".to_string();
+    let mut default_upper_bound = "pi".to_string();
+    let mut default_num_intervals = "1e7".to_string();
 
-    // Request user input for lower bound
-    let lower_bound = Text::new("Insert the lower bound: ").prompt().unwrap();
-    // Parse the lower bound string into a floating-point number
-    let lower_bound = meval::eval_str(lower_bound).unwrap();
+    loop {
+        // Request user input for function
+        let msg = &format!("Insert the function (default: {}): ", default_func);
+        let func = Text::new(msg).prompt().unwrap();
+        let func = get_or_update_default(&func, &mut default_func);
+        // Parse the function string into a meval expression
+        let expr: meval::Expr = func.parse().unwrap();
+        // Bind the variable 'x' to the expression
+        let func = expr.clone().bind("x").unwrap();
 
-    // Request user input for upper bound
-    let upper_bound = Text::new("Insert the upper bound: ").prompt().unwrap();
-    // Parse the upper bound string into a floating-point number
-    let upper_bound = meval::eval_str(upper_bound).unwrap();
+        // Request user input for lower bound
+        let msg = &format!(
+            "Insert the lower bound (default: {}): ",
+            default_lower_bound
+        );
+        let lower_bound = Text::new(msg).prompt().unwrap();
+        let lower_bound = get_or_update_default(&lower_bound, &mut default_lower_bound);
+        // Parse the lower bound string into a floating-point number
+        let lower_bound = meval::eval_str(lower_bound).unwrap();
 
-    // Request user input for number of intervals
-    let num_intervals = Text::new("Insert the number of intervals: ")
-        .prompt()
-        .unwrap();
-    // Parse the number of intervals string into an unsigned 64-bit integer
-    let num_intervals = meval::eval_str(num_intervals).unwrap() as u64;
+        // Request user input for upper bound
+        let msg = &format!(
+            "Insert the upper bound (default: {}): ",
+            default_upper_bound
+        );
+        let upper_bound = Text::new(msg).prompt().unwrap();
+        let upper_bound = get_or_update_default(&upper_bound, &mut default_upper_bound);
+        // Parse the upper bound string into a floating-point number
+        let upper_bound = meval::eval_str(upper_bound).unwrap();
 
-    // Print the user inputs
-    println!("Test function: {:?}", expr);
-    println!("Lower bound: {}", lower_bound);
-    println!("Upper bound: {}", upper_bound);
-    println!("Intervals: {}", num_intervals);
+        // Request user input for number of intervals
+        let msg = &format!(
+            "Insert the number of intervals (default: {}): ",
+            default_num_intervals
+        );
+        let num_intervals = Text::new(msg).prompt().unwrap();
+        let num_intervals = get_or_update_default(&num_intervals, &mut default_num_intervals);
+        // Parse the number of intervals string into an unsigned 64-bit integer
+        let num_intervals = meval::eval_str(num_intervals).unwrap() as u64;
 
-    // Perform numerical integration using the Integral struct
-    let res = Integral::new(Box::new(func), lower_bound, upper_bound, num_intervals).integrate();
+        // Print the user inputs
+        println!("Test function: {}", default_func);
+        println!("Lower bound: {}", default_lower_bound);
+        println!("Upper bound: {}", default_upper_bound);
+        println!("Intervals: {}", default_num_intervals);
 
-    // Print the result of the integration
-    println!("The result of the integral is: {}", res);
+        // Perform numerical integration using the Integral struct
+        let res =
+            Integral::new(Box::new(func), lower_bound, upper_bound, num_intervals).integrate();
+
+        // Print the result of the integration
+        println!("The result of the integral is: {}", res);
+
+        // Ask the user if they want to perform another calculation
+        if !ask_for_another_calculation() {
+            break;
+        }
+    }
 }
 
 /// Requests the user to input a function, X coordinate, and increment for derivative calculation.
 /// It then performs numerical differentiation and prints the result.
 fn call_derivatives() {
-    // Request user input for function
-    let func = Text::new("Insert the function: ").prompt().unwrap();
-    // Parse the function string into a meval expression
-    let expr: meval::Expr = func.parse().unwrap();
-    // Bind the variable 'x' to the expression
-    let func = expr.clone().bind("x").unwrap();
+    let mut default_func = "sin(x)".to_string();
+    let mut default_x_coord = "0".to_string();
+    let mut default_increment = "1e-7".to_string();
 
-    // Request user input for X coordinate
-    let x_coord = Text::new("Insert X coordinate: ").prompt().unwrap();
-    // Parse the X coordinate string into a floating-point number
-    let x_coord = meval::eval_str(x_coord).unwrap();
+    loop {
+        // Request user input for function
+        let msg = &format!("Insert the function (default: {}): ", default_func);
+        let func = Text::new(msg).prompt().unwrap();
+        let func = get_or_update_default(&func, &mut default_func);
+        // Parse the function string into a meval expression
+        let expr: meval::Expr = func.parse().unwrap();
+        // Bind the variable 'x' to the expression
+        let func = expr.clone().bind("x").unwrap();
 
-    // Request user input for increment
-    let increment = Text::new("Insert the increment: ").prompt().unwrap();
-    // Parse the increment string into a floating-point number
-    let increment = meval::eval_str(increment).unwrap();
+        // Request user input for X coordinate
+        let msg = &format!("Insert the X coordinate (default: {}): ", default_x_coord);
+        let x_coord = Text::new(msg).prompt().unwrap();
+        let x_coord = get_or_update_default(&x_coord, &mut default_x_coord);
+        // Parse the X coordinate string into a floating-point number
+        let x_coord = meval::eval_str(x_coord).unwrap();
 
-    // Print the user inputs
-    println!("Test function: {:?}", expr);
-    println!("X coordinate: {}", x_coord);
-    println!("Increment: {}", increment);
+        // Request user input for increment
+        let msg = &format!("Insert the increment (default: {}): ", default_increment);
+        let increment = Text::new(msg).prompt().unwrap();
+        let increment = get_or_update_default(&increment, &mut default_increment);
+        // Parse the increment string into a floating-point number
+        let increment = meval::eval_str(increment).unwrap();
 
-    // Perform numerical differentiation using the Derivative struct
-    let res = Derivative::new(Box::new(func), x_coord, increment).forward_difference();
+        // Print the user inputs
+        println!("Test function: {}", default_func);
+        println!("X coordinate: {}", default_x_coord);
+        println!("Increment: {}", default_increment);
 
-    // Print the result of the differentiation
-    println!("The result of the derivate is: {}", res);
+        // Perform numerical differentiation using the Derivative struct
+        let res = Derivative::new(Box::new(func), x_coord, increment).forward_difference();
+
+        // Print the result of the differentiation
+        println!("The result of the derivate is: {}", res);
+
+        // Ask the user if they want to perform another calculation
+        if !ask_for_another_calculation() {
+            break;
+        }
+    }
 }
