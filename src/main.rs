@@ -80,26 +80,6 @@ fn main_menu() -> String {
     }
 }
 
-/// Checks if the input is empty and returns the default value if it is.
-/// Otherwise, it updates the default value with the input and returns the input.
-///
-/// # Arguments
-/// * `input` - A string slice that holds the user input.
-/// * `default` - A mutable reference to a string that holds the default value.
-///
-/// # Returns
-/// A string that is either the user input or the default value.
-fn get_or_update_default(input: &String, default: &mut String) -> String {
-    let input = input.trim();
-    // Check if the input is empty and return the default value if it is
-    if input.is_empty() {
-        return default.clone();
-    }
-    // Otherwise, return the input
-    *default = input.to_string();
-    input.to_string()
-}
-
 /// Prompts the user to ask if they want to perform another calculation.
 ///
 fn ask_for_another_calculation() -> bool {
