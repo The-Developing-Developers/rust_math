@@ -123,21 +123,19 @@ fn call_integrals() {
 
     loop {
         // Request user input for function
-        let msg = &format!("Insert the function (default: {}): ", default_func);
-        let func = Text::new(msg).prompt().unwrap();
-        let func = get_or_update_default(&func, &mut default_func);
+        let func = Text::new("Insert the function")
+            .with_default(&default_func)
+            .prompt()
+            .unwrap();
+        default_func = func.clone();
         // Parse the function string into a meval expression
         let expr: meval::Expr = func.parse().unwrap();
         // Bind the variable 'x' to the expression
         let func = expr.clone().bind("x").unwrap();
 
         // Request user input for lower bound
-        let msg = &format!(
-            "Insert the lower bound (default: {}): ",
-            default_lower_bound
-        );
-        let lower_bound = Text::new(msg).prompt().unwrap();
-        let lower_bound = get_or_update_default(&lower_bound, &mut default_lower_bound);
+        let lower_bound = Text::new("Insert the lower bound").prompt().unwrap();
+        default_lower_bound = lower_bound.clone();
         // Parse the lower bound string into a floating-point number
         let lower_bound = meval::eval_str(lower_bound).unwrap();
 
@@ -146,8 +144,11 @@ fn call_integrals() {
             "Insert the upper bound (default: {}): ",
             default_upper_bound
         );
-        let upper_bound = Text::new(msg).prompt().unwrap();
-        let upper_bound = get_or_update_default(&upper_bound, &mut default_upper_bound);
+        let upper_bound = Text::new(msg)
+            .with_default(&default_upper_bound)
+            .prompt()
+            .unwrap();
+        default_upper_bound = upper_bound.clone();
         // Parse the upper bound string into a floating-point number
         let upper_bound = meval::eval_str(upper_bound).unwrap();
 
@@ -156,8 +157,11 @@ fn call_integrals() {
             "Insert the number of intervals (default: {}): ",
             default_num_intervals
         );
-        let num_intervals = Text::new(msg).prompt().unwrap();
-        let num_intervals = get_or_update_default(&num_intervals, &mut default_num_intervals);
+        let num_intervals = Text::new(msg)
+            .with_default(&default_num_intervals)
+            .prompt()
+            .unwrap();
+        default_num_intervals = num_intervals.clone();
         // Parse the number of intervals string into an unsigned 64-bit integer
         let num_intervals = meval::eval_str(num_intervals).unwrap() as u64;
 
