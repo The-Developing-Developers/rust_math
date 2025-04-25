@@ -55,7 +55,7 @@ impl Derivative {
     /// ```
     /// use rust_math_lib::derivatives::Derivative;
     ///
-    /// let mut derivative = Derivative::new(|x| x * x, 2.0, 1e-6);
+    /// let mut derivative = Derivative::new(Box::new(|x| x * x), 2.0, 1e-6);
     /// let result = derivative.forward_difference();
     /// ```
     pub fn forward_difference(&mut self) -> f64 {
@@ -79,7 +79,7 @@ impl Derivative {
     /// /// # Example
     /// /// ```
     /// use rust_math_lib::derivatives::Derivative;
-    /// let mut derivative = Derivative::new(|x| x * x, 2.0, 1e-6);
+    /// let mut derivative = Derivative::new(Box::new(|x| x * x), 2.0, 1e-6);
     /// let result = derivative.backward_difference();
     /// /// ```
     pub fn backward_difference(&mut self) -> f64 {
@@ -99,7 +99,7 @@ impl Derivative {
     /// # Example
     /// ```
     /// use rust_math_lib::derivatives::Derivative;
-    /// let mut derivative = Derivative::new(|x| x * x, 2.0, 1e-6);
+    /// let mut derivative = Derivative::new(Box::new(|x| x * x), 2.0, 1e-6);
     /// let result = derivative.central_difference();
     /// ```
     pub fn central_difference(&mut self) -> f64 {
