@@ -114,7 +114,10 @@ fn call_integrals() {
         let func = expr.clone().bind("x").unwrap();
 
         // Request user input for lower bound
-        let lower_bound = Text::new("Insert the lower bound").prompt().unwrap();
+        let lower_bound = Text::new("Insert the lower bound")
+            .with_default(&default_lower_bound)
+            .prompt()
+            .unwrap();
         default_lower_bound = lower_bound.clone();
         // Parse the lower bound string into a floating-point number
         let lower_bound = meval::eval_str(lower_bound).unwrap();
