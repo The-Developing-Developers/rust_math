@@ -181,11 +181,23 @@ fn call_integrals() {
 /// Requests the user to input a function, X coordinate, and increment for derivative calculation.
 /// It then performs numerical differentiation and prints the result.
 fn call_derivatives() {
+    let algorithms = vec![
+        "Forward Difference",
+        "Central Difference",
+        "Backward Difference",
+    ];
+
+    let mut default_algorithm = "Forward Difference".to_string();
     let mut default_func = "sin(x)".to_string();
     let mut default_x_coord = "0".to_string();
     let mut default_increment = "1e-7".to_string();
 
     loop {
+        // Request user input for algorithm
+        let msg = &format!("Insert the algorithm (default: {}): ", default_algorithm);
+        let algorithm = Select::new(msg, algorithms.clone()).prompt().unwrap();
+        let algorithm = get_or_update_default(&algorithm.to_string(), &mut default_algorithm);
+
         // Request user input for function
         let msg = &format!("Insert the function (default: {}): ", default_func);
         let func = Text::new(msg).prompt().unwrap();
@@ -215,7 +227,26 @@ fn call_derivatives() {
         println!("Increment: {}", default_increment);
 
         // Perform numerical differentiation using the Derivative struct
-        let res = Derivative::new(Box::new(func), x_coord, increment).forward_difference();
+        let mut derivative = Derivative::new(Box::new(func), x_coord, increment);
+        let res;
+        match algorithm.as_str() {
+            "Forward Difference" => {
+                println!("Using Forward Difference method.");
+                res = derivative.forward_difference();
+            }
+            "Central Difference" => {
+                println!("Using Central Difference method.");
+                res = derivative.central_difference();
+            }
+            "Backward Difference" => {
+                println!("Using Backward Difference method.");
+                res = derivative.backward_difference();
+            }
+            _ => {
+                println!("Invalid algorithm selected. Using Forward Difference as default.");
+                res = derivative.forward_difference();
+            }
+        }
 
         // Print the result of the differentiation
         println!("The result of the derivate is: {}", res);
