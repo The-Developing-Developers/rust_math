@@ -50,7 +50,7 @@ impl Integral {
     /// ```
     /// use rust_math_lib::integrals::Integral;
     ///
-    /// let result = Integral::new(|x| x * x, 0.0, 3.0, 1e6 as u64).integrate();
+    /// let result = Integral::new(Box::new(|x| x * x), 0.0, 3.0, 1e6 as u64).integrate();
     /// println!("The integral is approximately: {}", result);
     /// ```
     pub fn integrate(&mut self) -> f64 {
