@@ -136,6 +136,16 @@ fn get_stats_table(stats: &Vec<CalculationStats>) -> Table {
 /// Requests the user to input a function, lower and upper bounds, and the number of intervals for integration.
 /// It then performs numerical integration and prints the result.
 fn call_integrals() {
+    // Expression validator for the function input
+    let expr_validator = |input: &str| match input.parse::<meval::Expr>() {
+        Ok(expr) => match expr.bind("x") {
+            Ok(_) => Ok(Validation::Valid),
+            Err(e) => return Ok(Validation::Invalid(e.into())),
+        },
+        Err(e) => Ok(Validation::Invalid(e.into())),
+    };
+
+    // Define the default values for the user inputs
     let mut default_func = "sin(x)".to_string();
     let mut default_lower_bound = "0".to_string();
     let mut default_upper_bound = "pi".to_string();
@@ -145,6 +155,7 @@ fn call_integrals() {
         // Request user input for function
         let func = Text::new("Insert the function")
             .with_default(&default_func)
+            .with_validator(expr_validator)
             .prompt()
             .unwrap();
         default_func = func.clone();
