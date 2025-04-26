@@ -13,7 +13,7 @@ use std::time::Instant;
 use figlet_rs::FIGfont;
 use inquire::error::InquireError;
 use inquire::list_option::ListOption;
-use inquire::validator::MinLengthValidator;
+use inquire::validator::{MinLengthValidator, StringValidator, Validation};
 use inquire::{MultiSelect, Select, Text};
 use meval;
 use tabled;
@@ -210,6 +210,15 @@ fn call_derivatives() {
         ListOption::new(2, "Backward Difference"),
     ];
 
+    // Expression validator for the function input
+    let expr_validator = |input: &str| match input.parse::<meval::Expr>() {
+        Ok(expr) => match expr.bind("x") {
+            Ok(_) => Ok(Validation::Valid),
+            Err(e) => return Ok(Validation::Invalid(e.into())),
+        },
+        Err(e) => Ok(Validation::Invalid(e.into())),
+    };
+
     // Define the default values for the user inputs
     let mut default_algorithms: Vec<usize> = vec![0, 1, 2];
     let mut default_func = "sin(x)".to_string();
@@ -232,6 +241,7 @@ fn call_derivatives() {
         // Request user input for function
         let func = Text::new("Insert the function")
             .with_default(&default_func)
+            .with_validator(expr_validator)
             .prompt()
             .unwrap();
         default_func = func.clone();
