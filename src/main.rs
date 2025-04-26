@@ -258,8 +258,9 @@ fn call_derivatives() {
             algorithms_options.clone(),
         )
         .with_default(&default_algorithms)
-        .with_validator(MinLengthValidator::new(1))
-        .with_help_message("Please, select at least one algorithm!")
+        .with_validator(
+            MinLengthValidator::new(1).with_message("Please, select at least one algorithm!"),
+        )
         .prompt()
         .unwrap();
         default_algorithms = algorithms.iter().map(|x| x.index).collect();
