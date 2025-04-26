@@ -145,6 +145,12 @@ fn call_integrals() {
         Err(e) => Ok(Validation::Invalid(e.into())),
     };
 
+    // Number validator
+    let number_validator = |input: &str| match meval::eval_str(input) {
+        Ok(_) => Ok(Validation::Valid),
+        Err(e) => return Ok(Validation::Invalid(e.into())),
+    };
+
     // Define the default values for the user inputs
     let mut default_func = "sin(x)".to_string();
     let mut default_lower_bound = "0".to_string();
@@ -167,6 +173,7 @@ fn call_integrals() {
         // Request user input for lower bound
         let lower_bound = Text::new("Insert the lower bound")
             .with_default(&default_lower_bound)
+            .with_validator(number_validator)
             .prompt()
             .unwrap();
         default_lower_bound = lower_bound.clone();
@@ -176,6 +183,7 @@ fn call_integrals() {
         // Request user input for upper bound
         let upper_bound = Text::new("Insert the upper bound")
             .with_default(&default_upper_bound)
+            .with_validator(number_validator)
             .prompt()
             .unwrap();
         default_upper_bound = upper_bound.clone();
@@ -185,6 +193,7 @@ fn call_integrals() {
         // Request user input for number of intervals
         let num_intervals = Text::new("Insert the number of intervals")
             .with_default(&default_num_intervals)
+            .with_validator(number_validator)
             .prompt()
             .unwrap();
         default_num_intervals = num_intervals.clone();
