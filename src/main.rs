@@ -51,24 +51,26 @@ fn main() {
     println!("Welcome to the Rust Math CLI!\n");
 
     // Display the main menu and get the user's selection
-    match main_menu().as_str() {
-        "Integrals" => {
-            println!("You selected Integrals.");
-            // Call the integrals module or function here
-            call_integrals();
-        }
-        "Derivatives" => {
-            println!("You selected Derivatives.");
-            // Call the derivatives module or function here
-            call_derivatives();
-        }
-        "Exit" => {
-            println!("Exiting...");
-            std::process::exit(0);
-        }
-        _ => {
-            println!("Invalid selection. Exiting...");
-            std::process::exit(1);
+    loop {
+        match main_menu().as_str() {
+            "Integrals" => {
+                println!("You selected Integrals.");
+                // Call the integrals module or function here
+                call_integrals();
+            }
+            "Derivatives" => {
+                println!("You selected Derivatives.");
+                // Call the derivatives module or function here
+                call_derivatives();
+            }
+            "Exit" => {
+                println!("Exiting...");
+                std::process::exit(0);
+            }
+            _ => {
+                println!("Invalid selection. Exiting...");
+                std::process::exit(1);
+            }
         }
     }
 }
