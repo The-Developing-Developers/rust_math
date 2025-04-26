@@ -93,7 +93,7 @@ fn main_menu() -> String {
 
     // Ask the user to select an option from the menu
     let selected: Result<&str, InquireError> =
-        Select::new("Select type of calculation?", options).prompt();
+        Select::new("Select type of calculation:", options).prompt();
 
     // Check the result of the selection
     match selected {
