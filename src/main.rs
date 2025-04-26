@@ -230,6 +230,12 @@ fn call_derivatives() {
         Err(e) => Ok(Validation::Invalid(e.into())),
     };
 
+    // Number validator
+    let number_validator = |input: &str| match meval::eval_str(input) {
+        Ok(_) => Ok(Validation::Valid),
+        Err(e) => return Ok(Validation::Invalid(e.into())),
+    };
+
     // Define the default values for the user inputs
     let mut default_algorithms: Vec<usize> = vec![0, 1, 2];
     let mut default_func = "sin(x)".to_string();
@@ -264,6 +270,7 @@ fn call_derivatives() {
         // Request user input for X coordinate
         let x_coord = Text::new("Insert the X coordinate")
             .with_default(&default_x_coord)
+            .with_validator(number_validator)
             .prompt()
             .unwrap();
         default_x_coord = x_coord.clone();
@@ -273,6 +280,7 @@ fn call_derivatives() {
         // Request user input for increment
         let increment = Text::new("Insert the increment")
             .with_default(&default_increment)
+            .with_validator(number_validator)
             .prompt()
             .unwrap();
         default_increment = increment.clone();
