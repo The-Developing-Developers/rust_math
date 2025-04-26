@@ -163,11 +163,7 @@ fn call_integrals() {
         let lower_bound = meval::eval_str(lower_bound).unwrap();
 
         // Request user input for upper bound
-        let msg = &format!(
-            "Insert the upper bound (default: {}): ",
-            default_upper_bound
-        );
-        let upper_bound = Text::new(msg)
+        let upper_bound = Text::new("Insert the upper bound")
             .with_default(&default_upper_bound)
             .prompt()
             .unwrap();
@@ -176,11 +172,7 @@ fn call_integrals() {
         let upper_bound = meval::eval_str(upper_bound).unwrap();
 
         // Request user input for number of intervals
-        let msg = &format!(
-            "Insert the number of intervals (default: {}): ",
-            default_num_intervals
-        );
-        let num_intervals = Text::new(msg)
+        let num_intervals = Text::new("Insert the number of intervals")
             .with_default(&default_num_intervals)
             .prompt()
             .unwrap();
@@ -226,13 +218,15 @@ fn call_derivatives() {
 
     loop {
         // Request user input for algorithm
-        let msg = &format!("Insert the algorithm: ");
-        let algorithms = MultiSelect::new(msg, algorithms_options.clone())
-            .with_default(&default_algorithms)
-            .with_validator(MinLengthValidator::new(1))
-            .with_help_message("Please, select at least one algorithm!")
-            .prompt()
-            .unwrap();
+        let algorithms = MultiSelect::new(
+            "Select which algorithms to run:",
+            algorithms_options.clone(),
+        )
+        .with_default(&default_algorithms)
+        .with_validator(MinLengthValidator::new(1))
+        .with_help_message("Please, select at least one algorithm!")
+        .prompt()
+        .unwrap();
         default_algorithms = algorithms.iter().map(|x| x.index).collect();
 
         // Request user input for function
