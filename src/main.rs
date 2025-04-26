@@ -13,7 +13,7 @@ use std::time::Instant;
 use figlet_rs::FIGfont;
 use inquire::error::InquireError;
 use inquire::list_option::ListOption;
-use inquire::validator::{MinLengthValidator, StringValidator, Validation};
+use inquire::validator::{MinLengthValidator, Validation};
 use inquire::{MultiSelect, Select, Text};
 use meval;
 use tabled;
