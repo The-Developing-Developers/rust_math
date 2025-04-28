@@ -4,6 +4,10 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+figlet-rs = "0.1.5"
+inquire = "0.7.5"
+meval = "0.2.0"
+tabled = "0.19.0"
 
 [lib]
 name = "rust_math_lib"

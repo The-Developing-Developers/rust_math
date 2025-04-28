@@ -3,7 +3,7 @@
 //! For now, it only contains the `Derivative` struct with a single method `forward_difference`, which performs numerical
 //! differentiation using finite differences.
 
-type Function = fn(f64) -> f64;
+type Function = Box<dyn Fn(f64) -> f64>;
 
 /// A struct that provides numerical differentiation methods.
 pub struct Derivative {
@@ -14,7 +14,8 @@ pub struct Derivative {
 }
 
 impl Derivative {
-    pub fn new(function: Function, x_coordinate: f64, increment: f64) -> Self { // TODO: GS consider returning a Result instead of a struct
+    pub fn new(function: Function, x_coordinate: f64, increment: f64) -> Self {
+        // TODO: GS consider returning a Result instead of a struct
         let increment = if increment > 0.0 {
             increment
         } else {
@@ -54,12 +55,13 @@ impl Derivative {
     /// ```
     /// use rust_math_lib::derivatives::Derivative;
     ///
-    /// let mut derivative = Derivative::new(|x| x * x, 2.0, 1e-6);
+    /// let mut derivative = Derivative::new(Box::new(|x| x * x), 2.0, 1e-6);
     /// let result = derivative.forward_difference();
     /// ```
-    pub fn forward_difference(&mut self) -> f64
-    {
-        self.result = ( (self.function)(self.x_coordinate + self.increment) - (self.function)(self.x_coordinate) ) / self.increment;
+    pub fn forward_difference(&mut self) -> f64 {
+        self.result = ((self.function)(self.x_coordinate + self.increment)
+            - (self.function)(self.x_coordinate))
+            / self.increment;
         self.result
     }
 
@@ -77,12 +79,13 @@ impl Derivative {
     /// /// # Example
     /// /// ```
     /// use rust_math_lib::derivatives::Derivative;
-    /// let mut derivative = Derivative::new(|x| x * x, 2.0, 1e-6);
+    /// let mut derivative = Derivative::new(Box::new(|x| x * x), 2.0, 1e-6);
     /// let result = derivative.backward_difference();
     /// /// ```
-    pub fn backward_difference(&mut self) -> f64
-    {
-        self.result = ( (self.function)(self.x_coordinate) - (self.function)(self.x_coordinate - self.increment) ) / self.increment;
+    pub fn backward_difference(&mut self) -> f64 {
+        self.result = ((self.function)(self.x_coordinate)
+            - (self.function)(self.x_coordinate - self.increment))
+            / self.increment;
         self.result
     }
 
@@ -96,13 +99,14 @@ impl Derivative {
     /// # Example
     /// ```
     /// use rust_math_lib::derivatives::Derivative;
-    /// let mut derivative = Derivative::new(|x| x * x, 2.0, 1e-6);
+    /// let mut derivative = Derivative::new(Box::new(|x| x * x), 2.0, 1e-6);
     /// let result = derivative.central_difference();
     /// ```
-    pub fn central_difference(&mut self) -> f64
-    {
+    pub fn central_difference(&mut self) -> f64 {
         let half_increment = self.increment / 2.0;
-        self.result = ( (self.function)(self.x_coordinate + half_increment) - (self.function)(self.x_coordinate - half_increment) ) / self.increment;
+        self.result = ((self.function)(self.x_coordinate + half_increment)
+            - (self.function)(self.x_coordinate - half_increment))
+            / self.increment;
         self.result
     }
 }
@@ -128,17 +132,17 @@ mod tests {
     /// * `expected` - The expected value of the derivative.
     /// * `error_tolerance` - The acceptable error tolerance for the test.
     fn test_differentiation(
-        function: Function,
+        function: fn(f64) -> f64,
         x_coordinate: f64,
         increment: f64,
         expected: f64,
         error_tolerance: f64,
     ) {
-        let mut derivative = Derivative::new(function, x_coordinate, increment);
+        let mut derivative = Derivative::new(Box::new(function), x_coordinate, increment);
         let results_vec = vec![
-            ("Forward" , derivative.forward_difference()),
+            ("Forward", derivative.forward_difference()),
             ("Backward", derivative.backward_difference()),
-            ("Cental"  , derivative.central_difference()),
+            ("Cental", derivative.central_difference()),
         ];
 
         for (method_name, result) in results_vec {
@@ -146,13 +150,25 @@ mod tests {
             println!(
                 "Method: {}\n  {}Result{}:    {}\n  {}Expected{}:  {}\n  {}Tolerance{}: {}\n  {}Delta{}:     {}",
                 method_name,
-                CYAN,   RESET, result,
-                YELLOW, RESET, expected,
-                GREEN,  RESET, error_tolerance,
-                WHITE,  RESET, delta
+                CYAN,
+                RESET,
+                result,
+                YELLOW,
+                RESET,
+                expected,
+                GREEN,
+                RESET,
+                error_tolerance,
+                WHITE,
+                RESET,
+                delta
             );
 
-            assert!(delta < error_tolerance, "Test failed for {} method", method_name);
+            assert!(
+                delta < error_tolerance,
+                "Test failed for {} method",
+                method_name
+            );
         }
     }
 
