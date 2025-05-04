@@ -1,9 +1,10 @@
 //! This module implements numerical integration algorithms.
 //!
-//! For now, it only contains the `Integrator` struct with a single method `integrate`, which performs numerical
-//! integration using the Riemann sum method.
+//! It contains the `Integrator` struct, with two methods which perform numerical integration:
+//! - `riemann_integration`: Uses the Riemann sum method to approximate the integral of a function over a specified interval.
+//! - `simpson_integration_one_third`: Uses Simpson's 1/3 rule to approximate the integral of a function over a specified interval.
 
-type Function = Box<dyn Fn(f64) -> f64>; // TODO: GS consider using a trait object instead of a function pointer, or commonise the type definiton since it is used in both `integrals` and `derivatives` modules
+type Function = Box<dyn Fn(f64) -> f64>;
 
 /// A struct that provides numerical integration methods.
 pub struct Integral {
@@ -50,10 +51,10 @@ impl Integral {
     /// ```
     /// use rust_math_lib::integrals::Integral;
     ///
-    /// let result = Integral::new(Box::new(|x| x * x), 0.0, 3.0, 1e6 as u64).integrate();
+    /// let result = Integral::new(Box::new(|x| x * x), 0.0, 3.0, 1e6 as u64).riemann_integration();
     /// println!("The integral is approximately: {}", result);
     /// ```
-    pub fn integrate(&mut self) -> f64 {
+    pub fn riemann_integration(&mut self) -> f64 {
         let width = (self.upper_bound - self.lower_bound) / self.num_intervals as f64; // Width of each slice of the interval
 
         for i in 0..self.num_intervals {
@@ -63,6 +64,26 @@ impl Integral {
 
         self.result
     }
+
+    /// Performs numerical integration using Simpson's 1/3 rule.
+    /// Simpson's 1/3 rule approximates the integrand function with the a quadratic interpolant.
+    pub fn simpson_integration_one_third(&mut self) -> f64 {
+        let width = (self.upper_bound - self.lower_bound) / self.num_intervals as f64; // Width of each slice of the interval
+
+        for i in 0..self.num_intervals {
+            let x_coordinate = self.lower_bound + i as f64 * width;
+            let x_next = x_coordinate + width;
+            let x_mid = (x_coordinate + x_next) / 2.0;
+
+            // Simpson's rule: f(a) + 4f(m) + f(b)
+            self.result += (self.function)(x_coordinate)
+                + 4.0 * (self.function)(x_mid)
+                + (self.function)(x_next);
+        }
+
+        self.result *= width / 6.0; // Last step can be factored out of the integral, because it is constant
+        self.result
+    }
 }
 
 // ---- Tests ---- //
@@ -70,7 +91,7 @@ impl Integral {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::utils::colours::{CYAN, GREEN, MAGENTA, RESET, YELLOW};
+    use crate::utils::colours::*;
 
     /// Helper function to test integration with common logic.
     fn test_integration(
@@ -79,7 +100,7 @@ mod tests {
         upper_bound: f64,
         num_intervals: u32,
         expected: f64,
-        tolerance: f64,
+        error_tolerance: f64,
     ) {
         let mut integral = Integral::new(
             Box::new(function),
@@ -87,24 +108,38 @@ mod tests {
             upper_bound,
             num_intervals as u64,
         );
-        let result = integral.integrate();
-        let delta = (result - expected).abs();
-        println!(
-            "{}Result{}:    {}\n{}Expected{}:  {}\n{}Tolerance{}: {}\n{}Delta{}:     {}",
-            MAGENTA,
-            RESET,
-            result,
-            CYAN,
-            RESET,
-            expected,
-            YELLOW,
-            RESET,
-            tolerance,
-            GREEN,
-            RESET,
-            delta
-        );
-        assert!(delta < tolerance);
+        let results_vec = vec![
+            ("Riemann", integral.riemann_integration()),
+            ("Simpson's 1/3", integral.simpson_integration_one_third()),
+        ];
+
+        for (method_name, result) in results_vec {
+            let delta = (result - expected).abs();
+            println!(
+                "Method: {}\n  {}Result{}:    {}\n  {}Expected{}:  {}\n  {}Tolerance{}: {}\n  {}Delta{}:     {}",
+                method_name,
+                CYAN,
+                RESET,
+                result,
+                YELLOW,
+                RESET,
+                expected,
+                GREEN,
+                RESET,
+                error_tolerance,
+                WHITE,
+                RESET,
+                delta
+            );
+
+            assert!(
+                delta < error_tolerance,
+                "Test failed for {} method",
+                method_name
+            );
+
+        }
+
     }
 
     #[test]

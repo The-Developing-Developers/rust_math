@@ -1,9 +1,11 @@
 //! This module implements numerical derivatives algorithms.
 //!
-//! For now, it only contains the `Derivative` struct with a single method `forward_difference`, which performs numerical
-//! differentiation using finite differences.
+//! It contains the `Derivative` struct, with three methods which perform numerical differentiation:
+//! - `forward_difference`: Uses the forward difference method to approximate the derivative of a function at a specified point.
+//! - `backward_difference`: Uses the backward difference method to approximate the derivative of a function at a specified point.
+//! - `central_difference`: Uses the central difference method to approximate the derivative of a function at a specified point.
 
-type Function = Box<dyn Fn(f64) -> f64>;
+type Function = Box<dyn Fn(f64) -> f64>; // TODO: GS consider using a trait object instead of a function pointer, or commonise the type definition since it is used in both `integrals` and `derivatives` modules
 
 /// A struct that provides numerical differentiation methods.
 pub struct Derivative {
