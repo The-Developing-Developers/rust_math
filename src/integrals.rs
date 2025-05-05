@@ -137,9 +137,7 @@ mod tests {
                 "Test failed for {} method",
                 method_name
             );
-
         }
-
     }
 
     #[test]

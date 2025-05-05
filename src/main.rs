@@ -207,8 +207,8 @@ fn call_integrals() {
         println!("Intervals: {}", default_num_intervals);
 
         // Perform numerical integration using the Integral struct
-        let res =
-            Integral::new(Box::new(func), lower_bound, upper_bound, num_intervals).riemann_integration();
+        let res = Integral::new(Box::new(func), lower_bound, upper_bound, num_intervals)
+            .riemann_integration();
 
         // Print the result of the integration
         println!("The result of the integral is: {}", res);
