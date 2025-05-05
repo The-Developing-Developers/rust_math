@@ -15,7 +15,7 @@ jobs:
       run: |
         if ! cargo fmt --all -- --check; then
           echo "::error::Code is not properly formatted. Run 'cargo fmt' to fix."
-          exit 0
+          exit 1
         fi
     - name: Build
       run: cargo build --verbose
