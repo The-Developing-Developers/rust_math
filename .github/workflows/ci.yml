@@ -12,12 +12,11 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Check formatting
-      run: cargo fmt --all -- --check
-
-  build:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
+      run: |
+        if ! cargo fmt --all -- --check; then
+          echo "::error::Code is not properly formatted. Run 'cargo fmt' to fix."
+          exit 1
+        fi
     - name: Build
       run: cargo build --verbose
     - name: Run tests
