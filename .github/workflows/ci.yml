@@ -1,0 +1,23 @@
+name: Rust Build and Test
+
+on: [push, pull_request, workflow_dispatch]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+
+  check-build-test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Run check formatting
+      run: |
+        if ! cargo fmt --all -- --check; then
+          echo "::error::Code is not properly formatted. Run 'cargo fmt' to fix."
+          exit 1
+        fi
+    - name: Run build
+      run: cargo build --verbose
+    - name: Run tests
+      run: cargo test --verbose
