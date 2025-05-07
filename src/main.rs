@@ -136,6 +136,11 @@ fn get_stats_table(stats: &Vec<CalculationStats>) -> Table {
 /// Requests the user to input a function, lower and upper bounds, and the number of intervals for integration.
 /// It then performs numerical integration and prints the result.
 fn call_integrals() {
+    let algorithms_options = vec![
+        ListOption::new(0, "Riemann Sum"),
+        ListOption::new(1, "Simpson's 1/3 Rule"),
+    ];
+
     // Expression validator for the function input
     let expr_validator = |input: &str| match input.parse::<meval::Expr>() {
         Ok(expr) => match expr.bind("x") {
@@ -152,12 +157,26 @@ fn call_integrals() {
     };
 
     // Define the default values for the user inputs
+    let mut default_algorithms: Vec<usize> = algorithms_options.iter().map(|x| x.index).collect();
     let mut default_func = "sin(x)".to_string();
     let mut default_lower_bound = "0".to_string();
     let mut default_upper_bound = "pi".to_string();
     let mut default_num_intervals = "1e7".to_string();
 
     loop {
+        // Request user input for algorithm
+        let algorithms = MultiSelect::new(
+            "Select which algorithms to run:",
+            algorithms_options.clone(),
+        )
+        .with_default(&default_algorithms)
+        .with_validator(
+            MinLengthValidator::new(1).with_message("Please, select at least one algorithm!"),
+        )
+        .prompt()
+        .unwrap();
+        default_algorithms = algorithms.iter().map(|x| x.index).collect();
+
         // Request user input for function
         let func = Text::new("Insert the function")
             .with_default(&default_func)
@@ -207,11 +226,35 @@ fn call_integrals() {
         println!("Intervals: {}", default_num_intervals);
 
         // Perform numerical integration using the Integral struct
-        let res = Integral::new(Box::new(func), lower_bound, upper_bound, num_intervals)
-            .riemann_integration();
+        let mut integral = Integral::new(Box::new(func), lower_bound, upper_bound, num_intervals);
+        let mut stats: Vec<CalculationStats> = vec![];
+        algorithms.iter().for_each(|algorithm| {
+            println!("Using algorithm: {}", algorithm.value);
+            let res;
+            let process_time = Instant::now();
+            match algorithm.value {
+                "Riemann Sum" => {
+                    res = integral.riemann_integration();
+                }
+                "Simpson's 1/3 Rule" => {
+                    res = integral.simpson_integration_one_third();
+                }
+                _ => {
+                    println!("Invalid algorithm selected. Using Riemann Sum as default.");
+                    res = integral.riemann_integration();
+                }
+            }
+            let process_time = process_time.elapsed();
+            stats.push(CalculationStats {
+                algorithm: algorithm.value.to_string(),
+                process_time: format!("{:?}", process_time),
+                result: res,
+            });
+        });
 
-        // Print the result of the integration
-        println!("The result of the integral is: {}", res);
+        // Print the results of integrations
+        println!("\nResults of integrations:");
+        println!("{}", get_stats_table(&stats));
 
         // Ask the user if they want to perform another calculation
         if !ask_for_another_calculation() {
@@ -330,12 +373,10 @@ fn call_derivatives() {
                 process_time: format!("{:?}", process_time),
                 result: res,
             });
-            // Print the result of the differentiation
-            // println!("The result of the derivate is: {}", res);
         });
 
-        // Print the results of the differentiation
-        println!("\nResults of the differentiation:");
+        // Print the results of differentiations
+        println!("\nResults of differentiations:");
         println!("{}", get_stats_table(&stats));
 
         // Ask the user if they want to perform another calculation
