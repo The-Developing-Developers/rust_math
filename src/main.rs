@@ -373,12 +373,10 @@ fn call_derivatives() {
                 process_time: format!("{:?}", process_time),
                 result: res,
             });
-            // Print the result of the differentiation
-            // println!("The result of the derivate is: {}", res);
         });
 
-        // Print the results of the differentiation
-        println!("\nResults of the differentiation:");
+        // Print the results of differentiations
+        println!("\nResults of differentiations:");
         println!("{}", get_stats_table(&stats));
 
         // Ask the user if they want to perform another calculation
