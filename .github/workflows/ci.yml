@@ -1,6 +1,6 @@
 name: Rust Build and Test
 
-on: [push, pull_request, workflow_dispatch]
+on: [pull_request, workflow_dispatch]
 
 env:
   CARGO_TERM_COLOR: always
